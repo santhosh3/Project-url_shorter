@@ -53,9 +53,9 @@ const createUrl = async function (req, res) {
         const newUrl = { longUrl, shortUrl, urlCode }
         const short = await urlModel.create(newUrl)
         const newData = {
-            urlCode: short.urlCode,
             longUrl: short.longUrl,
-            shortUrl: short.shortUrl
+            shortUrl: short.shortUrl,
+            urlCode: short.urlCode
         }
         await SET_ASYNC(`${urlCode}`, JSON.stringify(longUrl));
         await SET_ASYNC(`${longUrl}`, JSON.stringify(longUrl));
