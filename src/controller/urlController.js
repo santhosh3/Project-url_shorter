@@ -101,7 +101,7 @@ const getUrl = async function (req, res)
             await SET_ASYNC(`${urlCode}`, JSON.stringify(url.longUrl));
             return res.status(302).redirect(url.longUrl);
         }
-        return res.status(404).send({ status: false, message: "No such URL FOUND" })
+        return res.status(404).send({ status: false, message: "No such URL FOUND or given URl is not valid" })
     } catch (err) {
         res.status(500).json({ status: false, msg: err.message });
     }
