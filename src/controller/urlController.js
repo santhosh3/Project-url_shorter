@@ -8,21 +8,21 @@ const baseUrl = 'http://localhost:3000'
 const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
-const isValid = function (value) {
+const isValid = (value) => {
     if (typeof value === "undefined" || typeof value === null) return false;
     if (typeof value === "string" && value.trim().length === 0) return false;
     return true;
 };
 
-const isValidRequestBody = function (RequestBody) {
+const isValidRequestBody = (RequestBody) => {
     if(Object.keys(RequestBody).length == 0 || Object.keys(RequestBody).length > 1) return false
     return true;
 };
 
 
-const createUrl = async function (req, res) {
+const createUrl = async (req, res) => {
     try {
-        let longUrl = req.body.longUrl;
+        let longUrl = req.body.longUrl.trim();
         if (!isValidRequestBody(req.body)) {
             return res.status(400).send({ status: false, message: "Invalid request. Please provide url details", });
         }
@@ -31,8 +31,7 @@ const createUrl = async function (req, res) {
         }
         if (!(/^(https[s]?:\/\/){0,1}(www\.){0,1}[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,5}[\.]{0,1}/.test(longUrl))) {
             return res.status(400).send({ status: false, message: "Please enter valid LongURL" })
-        }
-  
+        }  
         if (!validUrl.isUri(baseUrl)) {
             return res.status(400).json({ status: false, message: "Please enter valid Base URL" })
         }
@@ -67,22 +66,24 @@ const createUrl = async function (req, res) {
 
 const getUrl = async function (req, res) 
 {
-    try {
-        urlCode = req.params.urlCode
-        let url1 = await GET_ASYNC(`${urlCode}`);
-        if (url1) {
-            return res.status(302).redirect(JSON.parse(url1))
+    try{
+        let data = req.params.urlCode
+        const url1 = await GET_ASYNC(`${data}`)
+        if(url1) {
+        return  res.status(302).redirect(JSON.parse(url1).longUrl)        
+      }
+        let short = await urlModel.findOne({urlCode: data.urlCode}) ;
+        if(short) {
+          await SET_ASYNC(`${data}`, JSON.stringify(short))
+          return res.status(302).redirect(short.longUrl)
         }
-        let url = await urlModel.findOne({ urlCode : urlCode })
-        if (url) {
-            await SET_ASYNC(`${urlCode}`, JSON.stringify(url.longUrl));
-            return res.status(302).redirect(url.longUrl);
-        }
-        return res.status(404).send({ status: false, message: "No such URL FOUND or given URl is not valid" })
-    } catch (err) {
-        res.status(500).json({ status: false, msg: err.message });
-    }
+         res.status(404).send({ status: false, message: "Urlcode Not Found" });              
+   }  
+    catch (err){
+        res.status(500).json({status : false , err: err.message})
+   }
 }
+
 
 
 

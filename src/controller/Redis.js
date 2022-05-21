@@ -6,9 +6,12 @@ const redisClient = redis.createClient(
   "redis-15760.c301.ap-south-1-1.ec2.cloud.redislabs.com",
   { no_ready_check: true }
 );
-redisClient.auth("C6tkPD2gghIHsxfHerNMscFiP179E89t", function (err) {
-  if (err) throw err;
-});
+try {
+      redisClient.auth("C6tkPD2gghIHsxfHerNMscFiP179E89t")
+}
+catch(error) {
+  console.log(error.message)
+}
 
 redisClient.on("connect", async function () {
   console.log("Connected to Redis..");
