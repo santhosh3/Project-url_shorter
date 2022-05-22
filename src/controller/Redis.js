@@ -14,7 +14,7 @@ catch(error) {
 }
 
 redisClient.on("connect", async function () {
-  console.log("Connected to Redis..");
+  console.log("Connected to Redis...");
 });
 
 

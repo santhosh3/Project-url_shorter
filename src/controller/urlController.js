@@ -22,7 +22,7 @@ const isValidRequestBody = (RequestBody) => {
 
 const createUrl = async (req, res) => {
     try {
-        let longUrl = req.body.longUrl.trim();
+        let longUrl = req.body.longUrl;
         if (!isValidRequestBody(req.body)) {
             return res.status(400).send({ status: false, message: "Invalid request. Please provide url details", });
         }
@@ -67,19 +67,21 @@ const createUrl = async (req, res) => {
 const getUrl = async function (req, res) 
 {
     try{
-        let data = req.params.urlCode
-        const url1 = await GET_ASYNC(`${data}`)
+        let urlCode = req.params.urlCode
+        const url1 = await GET_ASYNC(`${urlCode}`)
         if(url1) {
-        return  res.status(302).redirect(JSON.parse(url1).longUrl)        
+         return res.status(302).redirect(JSON.parse(url1).longUrl)       
       }
-        let short = await urlModel.findOne({urlCode: data.urlCode}) ;
-        if(short) {
-          await SET_ASYNC(`${data}`, JSON.stringify(short))
-          return res.status(302).redirect(short.longUrl)
-        }
-         res.status(404).send({ status: false, message: "Urlcode Not Found" });              
+        let url = await urlModel.findOne({urlCode:urlCode}) ;
+        if(url) {
+            await SET_ASYNC(`${urlCode}`, JSON.stringify(url))
+           return res.status(302).redirect(url.longUrl)   
+        }     
+        return  res.status(404).send({ status: false, message: "Urlcode Not Found" });          
+     
    }  
     catch (err){
+        console.log(err)
         res.status(500).json({status : false , err: err.message})
    }
 }
